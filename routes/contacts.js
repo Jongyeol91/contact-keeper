@@ -73,14 +73,30 @@ router.put('/:id', auth, async(req, res) => { // 파라미터의 id는 contact�
         console.error(err);
         res.status(500).send('Server Error');
     }
-
 });
 
 // @route   DELETE api/contacts/:id
 // @desc    add new contact
 // @access  Private
-router.delete("/:id", (req, res) => {
-    res.send("Delete Contact");
+router.delete("/:id", auth, async(req, res) => {
+    try {
+        // 못찾았을 경우
+        let contact = await Contact.findById(req.params.id);
+        if(!contact) return res.status(401).send({msg: "삭제할 연락처를 찾지 못했습니다."});
+        
+        // 권한 확인
+        if (contact.user.toString() !== req.user.id) {
+            return res.status(401).json({msg: "삭제 권한이 없습니다."});
+        }
+        
+        // 삭제 실행
+        await Contact.findByIdAndRemove(req.params.id);
+        res.json({msg: "삭제 성공"});
+
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
 });
 
 module.exports = router;
