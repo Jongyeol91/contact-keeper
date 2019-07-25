@@ -1,12 +1,17 @@
 const express = require("express");
-const db = require('./config/db')
+const connectDB = require('./config/db')
 const app = express();
+
 
 app.get("/", (req, res) => {
     res.json({msg: "hello"})
 })
 
-db()
+// DB연결
+connectDB();
+
+// 미들웨어 초기화
+app.use(express.json({extended: false})) //extended true: qs, extended false: qs-string
 
 // routes
 app.use('/api/users', require('./routes/users'));
